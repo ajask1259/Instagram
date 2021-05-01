@@ -18,6 +18,8 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
     // Firestoreのリスナー
     var listener: ListenerRegistration?
     
+    var commentPostdata: PostData!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -70,7 +72,9 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
         cell.setPostData(postArray[indexPath.row])
         
         // セル内のボタンのアクションをソースコードで設定する
-               cell.likeButton.addTarget(self, action:#selector(handleButton(_:forEvent:)), for: .touchUpInside)
+        cell.likeButton.addTarget(self, action:#selector(handleButton(_:forEvent:)), for: .touchUpInside)
+        
+        cell.commentButton.addTarget(self, action:#selector(commentHandleButton(_:forEvent:)), for: .touchUpInside)
 
         return cell
     }
@@ -103,4 +107,27 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
         }
     
     }
+    @objc func commentHandleButton(_ sender: UIButton, forEvent event: UIEvent){
+        print("DEBUG_PRINT: コメントボタンがタップされました")
+        //タップされた時のセルのインデックスを求める
+        let touch = event.allTouches?.first
+        let point = touch!.location(in: self.tableView)
+        let indexPath = tableView.indexPathForRow(at: point)
+
+        // 配列からタップされたインデックスのデータを取り出す
+        let postData = postArray[indexPath!.row]
+        
+        self.commentPostdata = postData
+        
+        
+        performSegue(withIdentifier: "commentSegue",sender: nil)
+    }
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {        let commentViewController:CommentViewController = segue.destination as! CommentViewController
+    
+        commentViewController.postData = commentPostdata
+    }
+    
+    @IBAction func unwind(_ segue: UIStoryboardSegue) {
+    }
+    
 }
